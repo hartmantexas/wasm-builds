@@ -1,7 +1,9 @@
 name: release
 on:
+  workflow_dispatch:
   push:
-    tags: ['v*']
+    branches: [main]
+    paths: ['RELEASE']
 permissions:
   contents: write
 jobs:
@@ -12,7 +14,8 @@ jobs:
       - name: Rebuild assets from parts and verify
         run: |
           set -e
-          d=parts/${GITHUB_REF_NAME}
+          TAG=$(cat RELEASE); echo "TAG=$TAG" >> $GITHUB_ENV
+          d=parts/$TAG
           mkdir -p out
           for p in $(ls $d | sed -E 's/\.part-[0-9]+$//' | sort -u); do
             cat $d/$p.part-* > out/$p
@@ -22,4 +25,4 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" out/* --title "Desktops $GITHUB_REF_NAME" --notes "Browser-ready desktop machines. Verify with sha256sum -c SHA256SUMS."
+        run: gh release create "$TAG" out/* --title "Desktops $TAG" --notes "Browser-ready desktop machines. Verify with sha256sum -c SHA256SUMS."
