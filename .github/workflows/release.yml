@@ -14,7 +14,7 @@ jobs:
           set -e
           d=parts/${GITHUB_REF_NAME}
           mkdir -p out
-          for p in $(ls $d | sed -E 's/\.part-[a-z]+$//' | sort -u); do
+          for p in $(ls $d | sed -E 's/\.part-[0-9]+$//' | sort -u); do
             cat $d/$p.part-* > out/$p
           done
           cp SHA256SUMS out/
