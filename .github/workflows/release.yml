@@ -1,8 +1,10 @@
 name: release
+# The factory pushes ONE orphan branch stage/<tag> holding the split parts. CI joins them, verifies sha256, publishes the
+# release, then deletes the branch, so main never carries machine bytes.
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: ['stage/**', main]
     paths: ['RELEASE']
 permissions:
   contents: write
@@ -25,4 +27,9 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$TAG" out/* --title "Desktops $TAG" --notes "Browser-ready desktop machines. Verify with sha256sum -c SHA256SUMS."
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then gh release upload "$TAG" out/* --clobber
+          else gh release create "$TAG" out/* --title "Machines $TAG" --notes "Browser-ready machines. Verify with sha256sum -c SHA256SUMS."; fi
+      - name: Drop the staging branch
+        if: startsWith(github.ref, 'refs/heads/stage/')
+        run: git push origin --delete "${GITHUB_REF#refs/heads/}"
