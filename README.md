@@ -32,3 +32,14 @@ Static flat apt repos — `apt-get update && apt-get install <package>` once the
 
 Verify with `sha256sum -c SHA256SUMS`. Kali tools are for labs and CTFs on systems you own or are allowed to test.
 Machines are built from free software only and contain no commercial games, firmware or media.
+
+### Alpine + Node dev snapshot (applies to `alpine-node`)
+
+An extra named snapshot of the `alpine-node` machine, with Rust (`rustc`+`cargo`) and OpenJDK 11 already `apk add`-ed and verified — no network needed at boot time. Go is deliberately not in it; its native Alpine build takes about ten minutes to `go run` even once (compiling the standard library from source in the emulator), so it is better served by a wasm-native Go toolchain than by this VM.
+
+| Adds | Size | Asset |
+|---|---|---|
+| `rustc`+`cargo` 1.96.1, `openjdk11-jdk` 11.0.32 | 302 MB | `alpine-node-dev-state.bin.zst` (v7) |
+| Matching `pack.json` (adds a `states` entry for the snapshot above) | 6 KB | `alpine-node-dev-pack.json` (v7) |
+
+To use it: extract `alpine-node.tar` as usual, then download these two files from the `v7` release and drop them next to the extracted `alpine-node/` folder — `alpine-node-dev-state.bin.zst` as `alpine-node/state-256-dev.bin.zst`, and `alpine-node-dev-pack.json` over `alpine-node/pack.json` (it is the same file, plus the `states` entry). Boot with `state: 'state-256-dev.bin.zst'` (or whatever `id` the `states` entry uses) instead of the default snapshot.
